@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deep Link Generator!</title>
+    <!-- Bulma -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css"/>
+    <!-- FontAwesome -->
+    <script src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <!-- Bulma Calendar -->
+    <link rel="stylesheet" href="bulma-calendar/bulma-calendar.min.css"/>
+    <!-- Snackbar -->
+    <link rel="stylesheet" href="snackbar/snackbar.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+  <body>
+    <!-- Title  -->
+  <section class="section" id="page-title">
+    <div class="container has-text-centered" id="this-element">
+        <h1 class="title is-1">Shareable Link Generator</h1>
+        <p class="subtitle">
+            Easily generate deep links to your favourite apps!
+        </p>
+    </div>
+  </section>
+  <!-- Tabs -->
+  
+  <section class="section" id="app">
+        <div class="tabs is-centered">
+            <ul>
+                <li v-bind:class="{'is-active': currentTab === 'whatsapp'}" @click="currentTab = 'whatsapp'">
+                    <a>
+                        <span class="icon is-small"><i class="fab fa-whatsapp"></i></span>
+                        <span>Whatsapp</span>
+                    </a>
+                </li>
+                <li v-bind:class="{'is-active': currentTab === 'telegram'}" @click="currentTab = 'telegram'">
+                    <a>
+                        <span class="icon is-small"><i class="fab fa-telegram-plane"></i></span>
+                        <span>Telegram</span>
+                    </a>
+                </li>
+                <li v-bind:class="{'is-active': currentTab === 'twitter'}" @click="currentTab = 'twitter'">
+                    <a>
+                        <span class="icon is-small"><i class="fab fa-twitter"></i></span>
+                        <span>Twitter</span>
+                    </a>
+                </li>
+                <li v-bind:class="{'is-active': currentTab === 'gmaps'}" @click="currentTab = 'gmaps'">
+                    <a>
+                        <span class="icon is-small"><i class="fas fa-map-marked-alt"></i></span>
+                        <span>Google Maps</span>
+                    </a>
+                </li>
+                <li v-bind:class="{'is-active': currentTab === 'gcal'}" @click="currentTab = 'gcal'">
+                    <a>
+                        <span class="icon is-small"><i class="far fa-calendar-alt"></i></span>
+                        <span>Google Calendar</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <div class="columns">
+                <div class="column is-half is-offset-one-quarter">
+                    <!-- Whatsapp Section -->
+                    <div id="whatsapp" v-show="currentTab === 'whatsapp'">
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Text Message" v-model="whatsapp.message">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="number" placeholder="Recipient's Mobile Number" v-model="whatsapp.mobileNumber">
+                            </div>
+                        </div>
+
+                        <a class="button is-link is-medium service-element" @click="generateWhatsappUrl" >Generate Link</a>
+
+                        <div class="generated-link" v-show="whatsapp.generatedUrl">
+                            <div class="box generatedUrlArea">
+                                <p>{{whatsapp.generatedUrl}}</p>
+                            </div>
+                            <span 
+                                @mouseover="isMouseoverCopy = true"
+                                @mouseout="isMouseoverCopy = false"
+                                @click="copyGeneratedUrl(whatsapp.generatedUrl)"
+                                class="copyTag"
+                                v-bind:class="{tag: isMouseoverCopy, 'is-link': isMouseoverCopy}"
+                            >copy</span>
+                        </div>
+                    </div>
+
+                    <!-- Telegram Section -->
+                    <div id="telegram" v-show="currentTab === 'telegram'">
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Text Message" v-model="telegram.message" v-bind:disabled="hasTelegramUsername">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Your URL (Do NOT include https://)" v-model="telegram.url" v-bind:disabled="hasTelegramUsername">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Recipient's Username" v-model="telegram.recipientUsername" v-bind:disabled="hasTelegramMessageOrUrl">
+                            </div>
+                        </div>
+                        <a class="button is-link is-medium service-element" @click="generateTelegramUrl">Generate Link</a>
+
+                        <div class="generated-link" v-show="telegram.generatedUrl">
+                            <div class="box generatedUrlArea">
+                                <p>{{telegram.generatedUrl}}</p>
+                            </div>
+                            <span 
+                                @mouseover="isMouseoverCopy = true"
+                                @mouseout="isMouseoverCopy = false"
+                                @click="copyGeneratedUrl(telegram.generatedUrl)"
+                                class="copyTag"
+                                v-bind:class="{tag: isMouseoverCopy, 'is-link': isMouseoverCopy}"
+                                style="position: absolute; top:5px; right:5px;">copy</span>
+                        </div>
+                    </div>
+
+                    <!-- Twitter Section -->
+                    <div id="twitter" v-show="currentTab === 'twitter'">
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Tweet" v-model="twitter.message">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Your URL (Do NOT include https://)" v-model="twitter.url">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Hashtags (seperated by commas)" v-model="twitter.hashtags">
+                            </div>
+                        </div>
+                        <a class="button is-link is-medium service-element" @click="generateTwitterUrl">Generate Link</a>
+
+                        <div class="generated-link" v-show="twitter.generatedUrl">
+                            <div class="box generatedUrlArea">
+                                <p>{{twitter.generatedUrl}}</p>
+                            </div>
+                            <span 
+                                @mouseover="isMouseoverCopy = true"
+                                @mouseout="isMouseoverCopy = false"
+                                @click="copyGeneratedUrl(twitter.generatedUrl)"
+                                class="copyTag"
+                                v-bind:class="{tag: isMouseoverCopy, 'is-link': isMouseoverCopy}"
+                                style="position: absolute; top:5px; right:5px;">copy</span>
+                        </div>
+                    </div>
+
+                    <!-- Google Maps Section -->
+                    <div id="gmaps" v-show="currentTab === 'gmaps'">
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Starting Address (Optional)" v-model="gmaps.startingAddress" v-bind:disabled="!gmaps.includeDirections">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Destination Address" v-model="gmaps.destinationAddress">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <label class="checkbox">
+                                <input type="checkbox" v-model="gmaps.includeDirections"/>
+                                Include directions
+                            </label>
+                        </div>
+                        <a class="button is-link is-medium service-element" @click="generateGmapsUrl">Generate Link</a>
+
+                        <div class="generated-link" v-show="gmaps.generatedUrl">
+                            <div class="box generatedUrlArea">
+                                <p>{{gmaps.generatedUrl}}</p>
+                            </div>
+                            <span 
+                                @mouseover="isMouseoverCopy = true"
+                                @mouseout="isMouseoverCopy = false"
+                                @click="copyGeneratedUrl(gmaps.generatedUrl)"
+                                class="copyTag"
+                                v-bind:class="{tag: isMouseoverCopy, 'is-link': isMouseoverCopy}"
+                                style="position: absolute; top:5px; right:5px;">copy</span>
+                        </div>
+                    </div>
+
+                    <!-- Google Calendar Section -->
+                    <div id="gcal" v-show="currentTab === 'gcal'">
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Title" v-model="gcal.title">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Description" v-model="gcal.description">
+                            </div>
+                        </div>
+                        <div class="field service-element">
+                            <div class="control">
+                                <input class="input is-medium" type="text" placeholder="Location Address" v-model="gcal.locationAddress">
+                            </div>
+                        </div>
+                        Selected date: {{ gcal.startDateTime }}
+	                    <button ref='calendarTrigger' type='button' @select="updateGcalDates">Change</button>
+                        <a class="button is-link is-medium service-element" @click="generateGmapsUrl">Generate Link</a>
+
+                        <div class="generated-link" v-show="gcal.generatedUrl">
+                            <div class="box generatedUrlArea">
+                                <p>{{gcal.generatedUrl}}</p>
+                            </div>
+                            <span 
+                                @mouseover="isMouseoverCopy = true"
+                                @mouseout="isMouseoverCopy = false"
+                                @click="copyGeneratedUrl(gcal.generatedUrl)"
+                                class="copyTag"
+                                v-bind:class="{tag: isMouseoverCopy, 'is-link': isMouseoverCopy}"
+                                style="position: absolute; top:5px; right:5px;">copy</span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>   
+        </div>
+  </section>
+  <script src="bulma-calendar/bulma-calendar.min.js"></script>
+  <script src="snackbar/snackbar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="main.js"></script>
+  </body>
+</html>

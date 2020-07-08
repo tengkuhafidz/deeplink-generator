@@ -1,0 +1,22 @@
+.service-element {
+    margin-top: 25px;
+}
+
+.generated-link {
+    position: relative;
+    margin-top: 40px;
+}
+
+.copyTag {
+    cursor: pointer;
+    position: absolute; 
+    top: 5px; 
+    right: 5px;
+}
+
+.generatedUrlArea {
+    background-color: rgb(241, 241, 241);  
+    overflow-x: auto; 
+    white-space: nowrap; 
+    padding-right: 5px;
+}
